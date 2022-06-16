@@ -3,13 +3,14 @@ package com.example.appminimarket
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appminimarket.modelos.Producto
 import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_almacen.*
 import java.util.*
 
 class AlmacenActivity : AppCompatActivity() {
@@ -17,6 +18,7 @@ class AlmacenActivity : AppCompatActivity() {
     private lateinit var dbref : DatabaseReference
     private lateinit var productoRecyclerview : RecyclerView
     private lateinit var productoArrayList : ArrayList<Producto>
+    private lateinit var tempProductoArrayList : ArrayList<Producto>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +36,7 @@ class AlmacenActivity : AppCompatActivity() {
         productoRecyclerview.setHasFixedSize(true)
 
         productoArrayList = arrayListOf<Producto>()
-        Ingresar()
-    }
-
-    private fun Ingresar(){
-       /* btnRegistrarProducto.setOnClickListener{
-            MantenimientoProducto(null)
-        }*/
+        tempProductoArrayList = arrayListOf<Producto>()
         getProductos()
     }
 
@@ -58,7 +54,9 @@ class AlmacenActivity : AppCompatActivity() {
 
                     }
 
-                    var adapter = Adapter(productoArrayList)
+                    tempProductoArrayList.addAll(productoArrayList)
+
+                    var adapter = Adapter(tempProductoArrayList)
                     productoRecyclerview.adapter = adapter
                     adapter.setOnItemClickListener(object : Adapter.onItemClickListener{
                         override fun onItemClick(position: Int) {
@@ -75,7 +73,6 @@ class AlmacenActivity : AppCompatActivity() {
         })
     }
 
-
     private fun MantenimientoProducto(producto: Producto?){
         val mantenimientoAlmacenIntent : Intent = Intent(this, MantenimientoAlmacenActivity::class.java).apply {
             if (producto != null) {
@@ -89,8 +86,45 @@ class AlmacenActivity : AppCompatActivity() {
         startActivity(mantenimientoAlmacenIntent)
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu_producto, menu)
+        val item = menu?.findItem(R.id.btnBuscarProducto)
+        val searchView = item?.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                tempProductoArrayList.clear()
+                val searchText = newText!!.toLowerCase(Locale.getDefault())
+                if (searchText.isNotEmpty()){
+                    productoArrayList.forEach{
+                        if (it.descripcion.toString().toLowerCase(Locale.getDefault())
+                           .contains(searchText)){
+                          tempProductoArrayList.add(it)
+                        }
+                    }
+                    productoRecyclerview.adapter!!.notifyDataSetChanged()
+                }else{
+                    tempProductoArrayList.clear()
+                    tempProductoArrayList.addAll(productoArrayList)
+                    productoRecyclerview.adapter!!.notifyDataSetChanged()
+                }
+                return false
+            }
+
+        })
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when (item.itemId) {
+            R.id.btnRegistrarProducto -> MantenimientoProducto(null)
+            android.R.id.home -> onBackPressed()
+        }
         return true
     }
 }

@@ -37,6 +37,7 @@ class MantenimientoAlmacenActivity : AppCompatActivity() {
 
         if (idProductoEditar != null){
             RecuperarDatos(descripcionEditar,precioCompraEditar,precioVentaEditar,stockEditar)
+            btnRegistrar.text = "Editar"
         }
 
         Ingresar(idProductoEditar)
