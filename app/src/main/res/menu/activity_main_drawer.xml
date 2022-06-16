@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item android:id="@+id/nav_item_uno"
+            android:icon="@drawable/almacen"
+            android:title="Almacén" />
+
+        <item android:id="@+id/nav_item_dos"
+            android:icon="@drawable/ordencompra"
+            android:title="Orden de Compra" />
+
+        <item android:id="@+id/nav_item_tres"
+            android:icon="@drawable/cerrarsesion"
+            android:title="Cerrar Sesión" />
+    </group>
+</menu>
