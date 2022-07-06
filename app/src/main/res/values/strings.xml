@@ -17,17 +17,39 @@
     <!-- Botones -->
     <string name="btn_iniciar_sesion">Iniciar Sesion</string>
     <string name="btn_registrar_usuario">Registrate</string>
-    <string name="btn_registrar_producto">Registrar</string>
+    <string name="btn_registrar">Registrar</string>
+
+    <string name="btn_registrar_producto">Registrar Producto</string>
+    <string name="btn_nuevo_producto">Nuevo Producto</string>
+
+    <string name="btn_nuevo_oc">Nueva Orden Compra</string>
+    <string name="btn_borrar_oc">Borrar</string>
 
     <!-- Hints -->
     <string name="txt_usuario">Usuario o Correo</string>
     <string name="txt_clave">Clave</string>
     <string name="google">GOOGLE</string>
 
-    <string name="et_producto_descripcion">Descripción</string>
+    <!-- Edit Text -->
+    <string name="et_descripcion">Descripción</string>
     <string name="et_producto_precio_compra">Precio Compra</string>
     <string name="et_producto_precio_venta">Precio Venta</string>
     <string name="et_producto_stock">Stock</string>
+
+    <string name="et_orden_compra_fecha_entrega">Fecha Entrega</string>
+    <string name="et_orden_compra_consideracion_pago">Consideración Pago</string>
+    <string name="et_cantidad">Cantidad</string>
+    <string name="et_precio">Precio</string>
+
+    <!-- Text View -->
+    <string name="tv_moneda">Moneda</string>
+
+    <!-- Spinners -->
+    <string-array name="sp_moneda">
+        <item>Selecionar Moneda</item>
+        <item>Soles</item>
+        <item>Dolares</item>
+    </string-array>
 
     <string name="prefs_file">com.example.appminimarket.PREFERENCE_FILE_KEY</string>
 

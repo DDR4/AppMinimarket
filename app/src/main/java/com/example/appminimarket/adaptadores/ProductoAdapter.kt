@@ -1,13 +1,14 @@
-package com.example.appminimarket
+package com.example.appminimarket.adaptadores
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appminimarket.R
 import com.example.appminimarket.modelos.Producto
 
-class Adapter(private val listaProductos : ArrayList<Producto>) : RecyclerView.Adapter<Adapter.MyViewHolder>() {
+class ProductoAdapter(private val listaProductos : ArrayList<Producto>) : RecyclerView.Adapter<ProductoAdapter.MyViewHolder>() {
 
     private lateinit var mlistener : onItemClickListener
 
@@ -20,7 +21,8 @@ class Adapter(private val listaProductos : ArrayList<Producto>) : RecyclerView.A
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.lista_producto_item,
+        val itemView = LayoutInflater.from(parent.context).inflate(
+            R.layout.lista_producto_item,
         parent,false)
         return MyViewHolder(itemView,mlistener)
     }

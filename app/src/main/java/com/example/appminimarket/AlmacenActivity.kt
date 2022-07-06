@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appminimarket.adaptadores.ProductoAdapter
 import com.example.appminimarket.modelos.Producto
 import com.google.firebase.database.*
 import java.util.*
@@ -28,8 +29,8 @@ class AlmacenActivity : AppCompatActivity() {
         toolbar.setTitle("Productos")
         toolbar.setTitleTextColor(Color.WHITE)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true);
-        supportActionBar?.setDisplayShowHomeEnabled(true);
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
 
         productoRecyclerview = findViewById(R.id.listaProductos)
         productoRecyclerview.layoutManager = LinearLayoutManager(this)
@@ -48,17 +49,15 @@ class AlmacenActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()){
                     for (userSnapshot in snapshot.children){
-
                         val producto = userSnapshot.getValue(Producto::class.java)
                         productoArrayList.add(producto!!)
-
                     }
 
                     tempProductoArrayList.addAll(productoArrayList)
 
-                    var adapter = Adapter(tempProductoArrayList)
+                    var adapter = ProductoAdapter(tempProductoArrayList)
                     productoRecyclerview.adapter = adapter
-                    adapter.setOnItemClickListener(object : Adapter.onItemClickListener{
+                    adapter.setOnItemClickListener(object : ProductoAdapter.onItemClickListener{
                         override fun onItemClick(position: Int) {
                             val producto = productoArrayList[position]
                             MantenimientoProducto(producto)

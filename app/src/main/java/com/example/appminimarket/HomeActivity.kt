@@ -98,10 +98,16 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             startActivity(almacenIntent)
         }
 
+        private fun OrdenCompra(){
+            val ordenCompraIntent : Intent = Intent(this, OrdenCompraActivity::class.java).apply {
+            }
+            startActivity(ordenCompraIntent)
+        }
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
          when (item.itemId) {
              R.id.nav_item_uno -> Almacen()
-             R.id.nav_item_dos -> Toast.makeText(this, "Item 2", Toast.LENGTH_LONG).show()
+             R.id.nav_item_dos -> OrdenCompra()
              R.id.nav_item_tres -> CerrarSesion()
          }
 

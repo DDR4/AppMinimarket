@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppMinimarket.NoActionBar">
         <activity
+            android:name=".MantenimientoOrdenCompraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OrdenCompraActivity"
+            android:exported="false" />
+        <activity
             android:name=".AlmacenActivity"
             android:exported="false"
             android:label="@string/title_activity_almacen"
