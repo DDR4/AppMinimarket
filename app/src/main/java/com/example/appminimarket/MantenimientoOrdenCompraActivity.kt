@@ -79,11 +79,10 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         }
 
         InicializarListaProductoOC()
+        RefrescarListaProductoOC(productoOCArrayList)
         AgregarProductoOC()
         AgregarOrdenCompra(idOrdenCompraEditar)
         RegistrarProductoOC(idOrdenCompraEditar)
-
-        //btnBorrarProducto.setOnClickListener{
     }
 
     private fun InicializarListaProductoOC(){
@@ -100,6 +99,8 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         val productoOCAdapter = ProductoOrdenCompraAdapter(productoOCArrayList,
             object : ProductoOrdenCompraAdapter.onItemClickListener {
                 override fun onItemClick(position: Int) {
+                    productoOCArrayList?.removeAt(position)
+                    RefrescarListaProductoOC(productoOCArrayList)
                 }
             }
         )
@@ -117,6 +118,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             else
             {
                 LimpiarProductoExistentesOC()
+                LimpiarProductoOC()
             }
         }
     }
@@ -152,8 +154,6 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
 
         val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
         productoOCArrayList?.add(producto)
-
-        //LimpiarProductoOC()
 
         RefrescarListaProductoOC(productoOCArrayList)
         LimpiarProductoOC()
