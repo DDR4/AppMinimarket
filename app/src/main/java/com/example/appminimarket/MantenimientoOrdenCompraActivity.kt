@@ -1,26 +1,30 @@
 package com.example.appminimarket
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appminimarket.adaptadores.ProductoOrdenCompraAdapter
 import com.example.appminimarket.modelos.OrdenCompra
 import com.example.appminimarket.modelos.ProductoOrdenCompra
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_mantenimiento_orden_compra.*
+import kotlinx.android.synthetic.main.activity_mantenimiento_orden_compra.etDesProducto
 import java.util.*
 
 class MantenimientoOrdenCompraActivity : AppCompatActivity() {
 
     val database = Firebase.database.reference
+    private lateinit var dbref : DatabaseReference
     private lateinit var productoOCRecyclerview: RecyclerView
-    private lateinit var productoOCArrayList: java.util.ArrayList<ProductoOrdenCompra>
+    private var productoOCArrayList: ArrayList<ProductoOrdenCompra>? = null
+    private lateinit var ordenCompraArrayList : ArrayList<OrdenCompra>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mantenimiento_orden_compra)
@@ -29,60 +33,130 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         toolbar.setTitle("Mantenimiento Orden Compra")
         toolbar.setTitleTextColor(Color.WHITE)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true);
-        supportActionBar?.setDisplayShowHomeEnabled(true);
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
 
+        ordenCompraArrayList = arrayListOf<OrdenCompra>()
+
+        val bundle = intent.extras
+        val idOrdenCompraEditar = bundle?.getString("idOrdenCompra")
+        var fechaEntregaEditar = bundle?.getString("fechaEntrega")
+        val consideracionPagoEditar = bundle?.getString("consideracionPago")
+        val monedaEditar = bundle?.getString("moneda")
+        val idProducto = bundle?.getString("idProducto")
+        val descripcionProdcto = bundle?.getString("descripcion")
+        val listaProductoOC = bundle?.getString("listaProductoOC")
+
+        if (listaProductoOC != null && listaProductoOC != ""){
+            ObtenerListaProductoOCTemporal(listaProductoOC)
+        }
+
+        val moneda = resources.getStringArray(R.array.sp_moneda)
+        if (spMoneda != null) {
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, moneda)
+            spMoneda.adapter = adapter
+            if(monedaEditar != null){
+                val spinnerPosition: Int = adapter.getPosition(monedaEditar)
+                spMoneda.setSelection(spinnerPosition)
+            }
+        }
+
+        if (idOrdenCompraEditar != null){
+            RecuperarDatos(fechaEntregaEditar,consideracionPagoEditar)
+            ObtenerListaProductoOC(idOrdenCompraEditar)
+            btnNuevaOC.text = "Editar"
+        }
+
+        if(idProducto != null){
+            val descripcion: EditText = findViewById(R.id.etDesProducto)
+            descripcion.setText(descripcionProdcto)
+            descripcion.isEnabled = false
+            btnNuevo.setBackgroundColor(Color.RED)
+            btnNuevo.text = "Cancelar Registro"
+            if (idOrdenCompraEditar != null){
+                ObtenerListaProductoOC(idOrdenCompraEditar)
+            }
+        }
+
+        InicializarListaProductoOC()
+        AgregarProductoOC()
+        AgregarOrdenCompra(idOrdenCompraEditar)
+        RegistrarProductoOC(idOrdenCompraEditar)
+
+        //btnBorrarProducto.setOnClickListener{
+    }
+
+    private fun InicializarListaProductoOC(){
         productoOCRecyclerview = findViewById(R.id.listaProductosOC)
         productoOCRecyclerview.layoutManager = LinearLayoutManager(this)
         productoOCRecyclerview.setHasFixedSize(true)
 
-        productoOCArrayList = arrayListOf<ProductoOrdenCompra>()
-
-        val moneda = resources.getStringArray(R.array.sp_moneda)
-        val spMoneda = findViewById<Spinner>(R.id.spMoneda)
-        if (spMoneda != null) {
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, moneda)
-            spMoneda.adapter = adapter
+        if (productoOCArrayList == null){
+            productoOCArrayList = arrayListOf<ProductoOrdenCompra>()
         }
+    }
 
-        AgregarProductoOC()
-        AgregarOrdenCompra()
+    private fun RefrescarListaProductoOC(productoOCArrayList: ArrayList<ProductoOrdenCompra>?){
+        val productoOCAdapter = ProductoOrdenCompraAdapter(productoOCArrayList,
+            object : ProductoOrdenCompraAdapter.onItemClickListener {
+                override fun onItemClick(position: Int) {
+                }
+            }
+        )
+        productoOCRecyclerview.adapter = productoOCAdapter
     }
 
     private fun AgregarProductoOC() {
         btnNuevo.setOnClickListener {
-            var idProductoOC = UUID.randomUUID().toString()
-            var descripcion = etDesProducto.text.toString()
-            var cantidad = etCantidad.text.toString().toInt()
-            var precio = etPrecio.text.toString().toDouble()
-
-            val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
-            productoOCArrayList.add(producto)
-
-            LimpiarProductoOC()
-
-            val productoOCAdapter = ProductoOrdenCompraAdapter(productoOCArrayList)
-            productoOCRecyclerview.adapter = productoOCAdapter
-
-            productoOCAdapter.setOnItemClickListener(object :
-                ProductoOrdenCompraAdapter.onItemClickListener {
-                override fun onItemClick(position: Int) {
-                    productoOCArrayList.removeAt(position)
-                    var productoOCArrayListAux: java.util.ArrayList<ProductoOrdenCompra>
-                    productoOCArrayListAux = arrayListOf<ProductoOrdenCompra>()
-
-                    productoOCArrayList.forEach{
-                        productoOCArrayListAux.add(it)
-                    }
-
-                    productoOCArrayList = arrayListOf<ProductoOrdenCompra>()
-                    productoOCArrayList = productoOCArrayListAux
-
-                    val productoOCAdapter = ProductoOrdenCompraAdapter(productoOCArrayList)
-                    productoOCRecyclerview.adapter = productoOCAdapter
-                }
-            })
+            val bundle = intent.extras
+            val idProducto = bundle?.getString("idProducto")
+            if (idProducto == null){
+                var idProductoOC = UUID.randomUUID().toString()
+                InsertarProductoOC(idProductoOC)
+            }
+            else
+            {
+                LimpiarProductoExistentesOC()
+            }
         }
+    }
+
+    private fun RegistrarProductoOC(idOrdenCompraEditar : String?){
+        btnRegistrar.setOnClickListener{
+            val bundle = intent.extras
+            val idProducto = bundle?.getString("idProducto")
+            if(idProducto != null) {
+                InsertarProductoOC(idProducto)
+                LimpiarProductoExistentesOC()
+            }
+            else
+            {
+                val almacenIntent : Intent = Intent(this, AlmacenActivity::class.java).apply {
+                    putExtra("registrarProductoOC",true)
+                    putExtra("idOrdenCompra",idOrdenCompraEditar)
+                    putExtra("fechaEntrega",etFechaEntrega.text.toString())
+                    putExtra("consideracionPago", etConsideracionPago.text.toString())
+                    putExtra("moneda",spMoneda.selectedItem.toString())
+                    putExtra("listaProductoOC",productoOCArrayList?.joinToString())
+                }
+                startActivity(almacenIntent)
+            }
+        }
+    }
+
+    private fun InsertarProductoOC(idProductoOC : String?){
+
+        var descripcion = etDesProducto.text.toString()
+        var cantidad = etCantidad.text.toString().toInt()
+        var precio = etPrecio.text.toString().toDouble()
+
+        val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
+        productoOCArrayList?.add(producto)
+
+        //LimpiarProductoOC()
+
+        RefrescarListaProductoOC(productoOCArrayList)
+        LimpiarProductoOC()
     }
 
     private fun LimpiarProductoOC(){
@@ -95,20 +169,114 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         precio.setText("")
     }
 
-    private fun AgregarOrdenCompra(){
+    private fun LimpiarProductoExistentesOC(){
+        val descripcion: EditText = findViewById(R.id.etDesProducto)
+        getIntent().removeExtra("idProducto")
+        getIntent().removeExtra("descripcion")
+        descripcion.isEnabled = true
+        btnNuevo.setBackgroundColor(Color.rgb(30,144,255))
+        btnNuevo.text = "Nuevo Producto"
+    }
+
+    private fun AgregarOrdenCompra(idOrdenCompraEditar : String?){
         btnNuevaOC.setOnClickListener{
-            var idOrdenCompra = UUID.randomUUID().toString()
+            var idOrdenCompra = ""
             var fechaEntrega = etFechaEntrega.text.toString()
             var consideracionPago = etConsideracionPago.text.toString()
             var moneda = spMoneda.selectedItem.toString()
 
+            if (idOrdenCompraEditar == null){
+                idOrdenCompra = UUID.randomUUID().toString()
+            } else {
+                idOrdenCompra = idOrdenCompraEditar
+            }
+
             val ordenCompraentity = database.child("ordenesCompra")
                 .child(idOrdenCompra)
-            val ordenCompra = OrdenCompra(idOrdenCompra,fechaEntrega,consideracionPago,moneda,productoOCArrayList)
+            val ordenCompra = OrdenCompra(idOrdenCompra,fechaEntrega,consideracionPago,moneda,
+                                productoOCArrayList)
             ordenCompraentity.setValue(ordenCompra)
+            val ordenCompraIntent : Intent = Intent(this, OrdenCompraActivity::class.java).apply {
+            }
+            startActivity(ordenCompraIntent)
         }
     }
 
+    private fun RecuperarDatos(fechaEntregaEditar : String?,consideracionPagoEditar : String?){
+        val fechaEntrega: EditText = findViewById(R.id.etFechaEntrega)
+        val consideracionPago: EditText = findViewById(R.id.etConsideracionPago)
+
+        fechaEntrega.setText(fechaEntregaEditar)
+        consideracionPago.setText(consideracionPagoEditar)
+    }
+
+    private fun ObtenerListaProductoOC(idOrdenCompraEditar : String?){
+
+        dbref = FirebaseDatabase.getInstance().getReference("ordenesCompra")
+
+        dbref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    for (userSnapshot in snapshot.children){
+                        val ordenCompra = userSnapshot.getValue(OrdenCompra::class.java)
+                        ordenCompraArrayList.add(ordenCompra!!)
+                    }
+                    var ordenCompra: OrdenCompra = ordenCompraArrayList.filter{
+                        it.idOrdenCompra == idOrdenCompraEditar
+                    }.single()
+                    var listaProductoOC = ordenCompra.listaProductoOC
+
+                    productoOCArrayList = listaProductoOC
+                    RefrescarListaProductoOC(productoOCArrayList)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
+    private fun ObtenerListaProductoOCTemporal(listaProductoOC : String){
+        InicializarListaProductoOC()
+        var delimitador = "ProductoOrdenCompra"
+        var delimitador1 = ','
+        var delimitador2 = '('
+        var delimitador3 = ')'
+        var listaProductoOCTemp = listaProductoOC.split(delimitador)
+
+        for (ProductoOCTempAux in listaProductoOCTemp){
+            if(ProductoOCTempAux != ""){
+                var ProductoOCTemp = ProductoOCTempAux.split(delimitador1,delimitador2,delimitador3)
+
+                var idProductoOC = ""
+                var descripcion = ""
+                var cantidad = 0
+                var precio = 0.0
+
+                var i = 0
+                for (item in ProductoOCTemp){
+                    var itemAux = item.trim()
+                    var delimitador = '='
+                    if (itemAux != ""){
+                        var entity = itemAux.split(delimitador)
+
+                        if(itemAux.contains(entity[0])){
+                            when(i){
+                                1 -> idProductoOC = entity[1]
+                                2 -> descripcion = entity[1]
+                                3 -> cantidad = entity[1].toInt()
+                                4 -> precio = entity[1].toDouble()
+                            }
+                        }
+                    }
+                    i++
+                }
+                val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
+                productoOCArrayList?.add(producto)
+            }
+        }
+        RefrescarListaProductoOC(productoOCArrayList)
+    }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

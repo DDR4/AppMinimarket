@@ -73,16 +73,41 @@ class AlmacenActivity : AppCompatActivity() {
     }
 
     private fun MantenimientoProducto(producto: Producto?){
-        val mantenimientoAlmacenIntent : Intent = Intent(this, MantenimientoAlmacenActivity::class.java).apply {
-            if (producto != null) {
-                putExtra("idProducto",producto.idProducto.toString())
-                putExtra("descripcion",producto.descripcion)
-                putExtra("precioCompra",producto.precioCompra)
-                putExtra("precioVenta",producto.precioVenta)
-                putExtra("stock",producto.stock)
+        val bundle = intent.extras
+        val registrarProductoOC = bundle?.getBoolean("registrarProductoOC")
+        val idOrdenCompraEditar = bundle?.getString("idOrdenCompra")
+        var fechaEntregaEditar = bundle?.getString("fechaEntrega")
+        val consideracionPagoEditar = bundle?.getString("consideracionPago")
+        val monedaEditar = bundle?.getString("moneda")
+        val listaProductoOC = bundle?.getString("listaProductoOC")
+
+        if (registrarProductoOC == true){
+            val mantenimientoOrdenCompraActivity : Intent = Intent(this, MantenimientoOrdenCompraActivity::class.java).apply {
+                if (producto != null) {
+                    putExtra("idProducto",producto.idProducto.toString())
+                    putExtra("descripcion",producto.descripcion)
+                    putExtra("idOrdenCompra",idOrdenCompraEditar)
+                    putExtra("fechaEntrega",fechaEntregaEditar)
+                    putExtra("consideracionPago",consideracionPagoEditar)
+                    putExtra("moneda",monedaEditar)
+                    putExtra("listaProductoOC",listaProductoOC)
+                }
             }
+            startActivity(mantenimientoOrdenCompraActivity)
         }
-        startActivity(mantenimientoAlmacenIntent)
+        else
+        {
+            val mantenimientoAlmacenIntent : Intent = Intent(this, MantenimientoAlmacenActivity::class.java).apply {
+                if (producto != null) {
+                    putExtra("idProducto",producto.idProducto.toString())
+                    putExtra("descripcion",producto.descripcion)
+                    putExtra("precioCompra",producto.precioCompra)
+                    putExtra("precioVenta",producto.precioVenta)
+                    putExtra("stock",producto.stock)
+                }
+            }
+            startActivity(mantenimientoAlmacenIntent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
