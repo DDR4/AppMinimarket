@@ -32,7 +32,8 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="@string/et_orden_compra_fecha_entrega"
-            android:inputType="date"
+            android:focusable="false"
+            android:clickable="true"
             android:minHeight="48dp"
             android:textColorHint="#000000"
             tools:ignore="DuplicateSpeakableTextCheck" />

@@ -1,5 +1,6 @@
 package com.example.appminimarket
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -37,6 +38,8 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         ordenCompraArrayList = arrayListOf<OrdenCompra>()
+        InicializarListaProductoOC()
+        RefrescarListaProductoOC(productoOCArrayList)
 
         val bundle = intent.extras
         val idOrdenCompraEditar = bundle?.getString("idOrdenCompra")
@@ -73,16 +76,45 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             descripcion.isEnabled = false
             btnNuevo.setBackgroundColor(Color.RED)
             btnNuevo.text = "Cancelar Registro"
-            if (idOrdenCompraEditar != null){
+            /*if (idOrdenCompraEditar != null){
                 ObtenerListaProductoOC(idOrdenCompraEditar)
-            }
+            }*/
         }
 
-        InicializarListaProductoOC()
-        RefrescarListaProductoOC(productoOCArrayList)
+        InicializarFechaEntrega()
         AgregarProductoOC()
         AgregarOrdenCompra(idOrdenCompraEditar)
         RegistrarProductoOC(idOrdenCompraEditar)
+    }
+
+    private fun InicializarFechaEntrega(){
+
+        etFechaEntrega.setOnClickListener{
+            val c = Calendar.getInstance()
+            val year = c.get(Calendar.YEAR)
+            val month = c.get(Calendar.MONTH)
+            val day = c.get(Calendar.DAY_OF_MONTH)
+
+            val dpd = DatePickerDialog(this@MantenimientoOrdenCompraActivity,
+            { view, year, monthOfYear, dayOfMonth ->
+
+                var dia =  dayOfMonth.toString()
+                var mes =  (monthOfYear + 1).toString()
+
+                if (dia.length == 1){
+                    dia = "0" + dia
+                }
+
+                if (mes.length == 1){
+                    mes = "0" + mes
+                }
+
+                etFechaEntrega.setText(dia + "/" + mes + "/" + year)
+
+            }, year, month, day)
+
+            dpd.show()
+        }
     }
 
     private fun InicializarListaProductoOC(){
@@ -216,18 +248,20 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
 
         dbref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()){
-                    for (userSnapshot in snapshot.children){
-                        val ordenCompra = userSnapshot.getValue(OrdenCompra::class.java)
-                        ordenCompraArrayList.add(ordenCompra!!)
-                    }
-                    var ordenCompra: OrdenCompra = ordenCompraArrayList.filter{
-                        it.idOrdenCompra == idOrdenCompraEditar
-                    }.single()
-                    var listaProductoOC = ordenCompra.listaProductoOC
+                if(productoOCArrayList?.size == 0) {
+                    if (snapshot.exists()) {
+                        for (userSnapshot in snapshot.children) {
+                            val ordenCompra = userSnapshot.getValue(OrdenCompra::class.java)
+                            ordenCompraArrayList.add(ordenCompra!!)
+                        }
+                        var ordenCompra: OrdenCompra = ordenCompraArrayList.filter {
+                            it.idOrdenCompra == idOrdenCompraEditar
+                        }.single()
+                        var listaProductoOC = ordenCompra.listaProductoOC
 
-                    productoOCArrayList = listaProductoOC
-                    RefrescarListaProductoOC(productoOCArrayList)
+                        productoOCArrayList = listaProductoOC
+                        RefrescarListaProductoOC(productoOCArrayList)
+                    }
                 }
             }
 
