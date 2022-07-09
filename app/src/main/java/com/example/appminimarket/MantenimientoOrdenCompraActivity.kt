@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appminimarket.adaptadores.ProductoOrdenCompraAdapter
 import com.example.appminimarket.modelos.OrdenCompra
+import com.example.appminimarket.modelos.Producto
 import com.example.appminimarket.modelos.ProductoOrdenCompra
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
@@ -47,7 +48,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         val consideracionPagoEditar = bundle?.getString("consideracionPago")
         val monedaEditar = bundle?.getString("moneda")
         val idProducto = bundle?.getString("idProducto")
-        val descripcionProdcto = bundle?.getString("descripcion")
+        val descripcionProducto = bundle?.getString("descripcion")
         val listaProductoOC = bundle?.getString("listaProductoOC")
 
         if (listaProductoOC != null && listaProductoOC != ""){
@@ -66,19 +67,18 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
 
         if (idOrdenCompraEditar != null){
             RecuperarDatos(fechaEntregaEditar,consideracionPagoEditar)
-            ObtenerListaProductoOC(idOrdenCompraEditar)
+            if(listaProductoOC != ""){
+                ObtenerListaProductoOC(idOrdenCompraEditar)
+            }
             btnNuevaOC.text = "Editar"
         }
 
         if(idProducto != null){
             val descripcion: EditText = findViewById(R.id.etDesProducto)
-            descripcion.setText(descripcionProdcto)
+            descripcion.setText(descripcionProducto)
             descripcion.isEnabled = false
             btnNuevo.setBackgroundColor(Color.RED)
             btnNuevo.text = "Cancelar Registro"
-            /*if (idOrdenCompraEditar != null){
-                ObtenerListaProductoOC(idOrdenCompraEditar)
-            }*/
         }
 
         InicializarFechaEntrega()
@@ -144,8 +144,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             val bundle = intent.extras
             val idProducto = bundle?.getString("idProducto")
             if (idProducto == null){
-                var idProductoOC = UUID.randomUUID().toString()
-                InsertarProductoOC(idProductoOC)
+                InsertarProductoOC(null,null)
             }
             else
             {
@@ -159,8 +158,9 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         btnRegistrar.setOnClickListener{
             val bundle = intent.extras
             val idProducto = bundle?.getString("idProducto")
+            val cantidadAnterior = bundle?.getInt("cantidadAnterior")
             if(idProducto != null) {
-                InsertarProductoOC(idProducto)
+                InsertarProductoOC(idProducto,cantidadAnterior)
                 LimpiarProductoExistentesOC()
             }
             else
@@ -178,13 +178,13 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         }
     }
 
-    private fun InsertarProductoOC(idProductoOC : String?){
+    private fun InsertarProductoOC(idProductoOC : String?, cantidadAnterior: Int?){
 
         var descripcion = etDesProducto.text.toString()
         var cantidad = etCantidad.text.toString().toInt()
         var precio = etPrecio.text.toString().toDouble()
 
-        val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
+        val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, cantidadAnterior, precio)
         productoOCArrayList?.add(producto)
 
         RefrescarListaProductoOC(productoOCArrayList)
@@ -205,6 +205,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         val descripcion: EditText = findViewById(R.id.etDesProducto)
         getIntent().removeExtra("idProducto")
         getIntent().removeExtra("descripcion")
+        getIntent().removeExtra("cantidadAnterior")
         descripcion.isEnabled = true
         btnNuevo.setBackgroundColor(Color.rgb(30,144,255))
         btnNuevo.text = "Nuevo Producto"
@@ -228,6 +229,27 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             val ordenCompra = OrdenCompra(idOrdenCompra,fechaEntrega,consideracionPago,moneda,
                                 productoOCArrayList)
             ordenCompraentity.setValue(ordenCompra)
+
+            for (productoOC in productoOCArrayList!!)
+            {
+                var idProductoOC = ""
+                var cantidad = 0
+                if (productoOC.idProductoOC == null){
+                    idProductoOC = UUID.randomUUID().toString()
+                    cantidad = productoOC.cantidad!!
+                }
+                else
+                {
+                    idProductoOC = productoOC.idProductoOC
+                    cantidad = productoOC.cantidadAnterior!! + productoOC.cantidad!!
+                }
+
+                val productoentity = database.child("productos")
+                    .child(idProductoOC)
+                val producto = Producto(idProductoOC,productoOC.descripcion,
+                    productoOC.precio,0.0,cantidad)
+                productoentity.setValue(producto)
+            }
             val ordenCompraIntent : Intent = Intent(this, OrdenCompraActivity::class.java).apply {
             }
             startActivity(ordenCompraIntent)
@@ -285,6 +307,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
                 var idProductoOC = ""
                 var descripcion = ""
                 var cantidad = 0
+                var cantidadAnterior = 0
                 var precio = 0.0
 
                 var i = 0
@@ -299,13 +322,15 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
                                 1 -> idProductoOC = entity[1]
                                 2 -> descripcion = entity[1]
                                 3 -> cantidad = entity[1].toInt()
-                                4 -> precio = entity[1].toDouble()
+                                4 -> cantidadAnterior = entity[1].toInt()
+                                5 -> precio = entity[1].toDouble()
                             }
                         }
                     }
                     i++
                 }
-                val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad, precio)
+                val producto = ProductoOrdenCompra(idProductoOC, descripcion, cantidad,
+                    cantidadAnterior, precio)
                 productoOCArrayList?.add(producto)
             }
         }
