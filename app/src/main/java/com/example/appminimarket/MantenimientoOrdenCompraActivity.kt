@@ -65,6 +65,10 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             }
         }
 
+        if(fechaEntregaEditar != null || consideracionPagoEditar != null){
+            RecuperarDatos(fechaEntregaEditar,consideracionPagoEditar)
+        }
+
         if (idOrdenCompraEditar != null){
             RecuperarDatos(fechaEntregaEditar,consideracionPagoEditar)
             if(listaProductoOC != ""){
@@ -142,9 +146,10 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
     private fun AgregarProductoOC() {
         btnNuevo.setOnClickListener {
             val bundle = intent.extras
-            val idProducto = bundle?.getString("idProducto")
+            var idProducto = bundle?.getString("idProducto")
             if (idProducto == null){
-                InsertarProductoOC(null,null)
+                idProducto = UUID.randomUUID().toString()
+                InsertarProductoOC(idProducto,0)
             }
             else
             {
@@ -338,7 +343,9 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+        val ordenCompraIntent : Intent = Intent(this, OrdenCompraActivity::class.java).apply {
+        }
+        startActivity(ordenCompraIntent)
         return true
     }
 }

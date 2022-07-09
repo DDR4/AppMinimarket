@@ -119,10 +119,12 @@ class OrdenCompraActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val homeIntent : Intent = Intent(this, HomeActivity::class.java).apply {
+        }
         val id = item.itemId
         when (item.itemId) {
             R.id.btnRegistrarOrdenCompra -> MantenimientoOrdenCompra(null)
-            android.R.id.home -> onBackPressed()
+            android.R.id.home -> startActivity(homeIntent)
         }
         return true
     }
