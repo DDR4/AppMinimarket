@@ -80,6 +80,7 @@ class OrdenCompraActivity : AppCompatActivity() {
                 putExtra("fechaEntrega",ordenCompra.fechaEntrega)
                 putExtra("consideracionPago",ordenCompra.consideracionPago)
                 putExtra("moneda",ordenCompra.moneda)
+                putExtra("estado",ordenCompra.estado)
             }
         }
         startActivity(mantenimientoOrdenCompraActivity)

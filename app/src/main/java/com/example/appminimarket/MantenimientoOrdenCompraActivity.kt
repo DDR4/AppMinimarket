@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appminimarket.adaptadores.ProductoOrdenCompraAdapter
@@ -47,6 +48,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
         var fechaEntregaEditar = bundle?.getString("fechaEntrega")
         val consideracionPagoEditar = bundle?.getString("consideracionPago")
         val monedaEditar = bundle?.getString("moneda")
+        val estadoEditar = bundle?.getString("estado")
         val idProducto = bundle?.getString("idProducto")
         val descripcionProducto = bundle?.getString("descripcion")
         val listaProductoOC = bundle?.getString("listaProductoOC")
@@ -65,6 +67,17 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             }
         }
 
+        val estado = resources.getStringArray(R.array.sp_estado)
+        if (spEstado != null) {
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, estado)
+            spEstado.adapter = adapter
+            spEstado.isVisible = false
+            if(estadoEditar != null){
+                val spinnerPosition: Int = adapter.getPosition(estadoEditar)
+                spEstado.setSelection(spinnerPosition)
+            }
+        }
+
         if(fechaEntregaEditar != null || consideracionPagoEditar != null){
             RecuperarDatos(fechaEntregaEditar,consideracionPagoEditar)
         }
@@ -75,6 +88,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
                 ObtenerListaProductoOC(idOrdenCompraEditar)
             }
             btnNuevaOC.text = "Editar"
+            spEstado.isVisible = true
         }
 
         if(idProducto != null){
@@ -176,6 +190,7 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
                     putExtra("fechaEntrega",etFechaEntrega.text.toString())
                     putExtra("consideracionPago", etConsideracionPago.text.toString())
                     putExtra("moneda",spMoneda.selectedItem.toString())
+                    putExtra("estado",spEstado.selectedItem.toString())
                     putExtra("listaProductoOC",productoOCArrayList?.joinToString())
                 }
                 startActivity(almacenIntent)
@@ -222,16 +237,19 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
             var fechaEntrega = etFechaEntrega.text.toString()
             var consideracionPago = etConsideracionPago.text.toString()
             var moneda = spMoneda.selectedItem.toString()
+            var estado = ""
 
             if (idOrdenCompraEditar == null){
                 idOrdenCompra = UUID.randomUUID().toString()
+                estado = "Emitido"
             } else {
                 idOrdenCompra = idOrdenCompraEditar
+                estado = spEstado.selectedItem.toString()
             }
 
             val ordenCompraentity = database.child("ordenesCompra")
                 .child(idOrdenCompra)
-            val ordenCompra = OrdenCompra(idOrdenCompra,fechaEntrega,consideracionPago,moneda,
+            val ordenCompra = OrdenCompra(idOrdenCompra,fechaEntrega,consideracionPago,moneda,estado,
                                 productoOCArrayList)
             ordenCompraentity.setValue(ordenCompra)
 
@@ -246,6 +264,9 @@ class MantenimientoOrdenCompraActivity : AppCompatActivity() {
                 else
                 {
                     idProductoOC = productoOC.idProductoOC
+                }
+
+                if (productoOC.idProductoOC != null && estado == "Atendido"){
                     cantidad = productoOC.cantidadAnterior!! + productoOC.cantidad!!
                 }
 

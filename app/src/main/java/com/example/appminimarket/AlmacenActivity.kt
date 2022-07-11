@@ -92,6 +92,7 @@ class AlmacenActivity : AppCompatActivity() {
         var fechaEntregaEditar = bundle?.getString("fechaEntrega")
         val consideracionPagoEditar = bundle?.getString("consideracionPago")
         val monedaEditar = bundle?.getString("moneda")
+        val estadoEditar = bundle?.getString("estado")
         val listaProductoOC = bundle?.getString("listaProductoOC")
 
         if (registrarProductoOC == true){
@@ -106,6 +107,7 @@ class AlmacenActivity : AppCompatActivity() {
                     putExtra("fechaEntrega",fechaEntregaEditar)
                     putExtra("consideracionPago",consideracionPagoEditar)
                     putExtra("moneda",monedaEditar)
+                    putExtra("estado",estadoEditar)
                     putExtra("listaProductoOC",listaProductoOC)
                 }
             }

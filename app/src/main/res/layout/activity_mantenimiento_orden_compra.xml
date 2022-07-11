@@ -56,6 +56,14 @@
             android:textColorHint="#000000"
             tools:ignore="DuplicateSpeakableTextCheck" />
 
+        <Spinner
+            android:id="@+id/spEstado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:textColorHint="#000000"
+            tools:ignore="DuplicateSpeakableTextCheck" />
+
         <EditText
             android:id="@+id/etDesProducto"
             android:layout_width="match_parent"
@@ -108,7 +116,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listaProductosOC"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="200dp"
             android:orientation="vertical"
             tools:listitem="@layout/lista_producto_oc_item">
 
