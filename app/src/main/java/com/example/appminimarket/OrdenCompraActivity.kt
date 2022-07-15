@@ -2,17 +2,15 @@ package com.example.appminimarket
 
 import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appminimarket.adaptadores.OrdenCompraAdapter
-import com.example.appminimarket.adaptadores.ProductoAdapter
 import com.example.appminimarket.modelos.OrdenCompra
-import com.example.appminimarket.modelos.Producto
 import com.google.firebase.database.*
 import java.util.*
 
@@ -68,7 +66,6 @@ class OrdenCompraActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
             }
         })
     }

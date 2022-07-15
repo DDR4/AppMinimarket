@@ -78,7 +78,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             correo.text = email
             proveedor.text = provider
 
-//            title = "Inicio"
         }
 
         private fun CerrarSesion(){
@@ -89,7 +88,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             prefs.apply()
 
             FirebaseAuth.getInstance().signOut()
-            onBackPressed()
+            val authIntent : Intent = Intent(this, AuthActivity::class.java).apply {
+            }
+            startActivity(authIntent)
         }
 
         private fun Almacen(){
